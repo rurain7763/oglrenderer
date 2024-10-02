@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "../Logger/Logger.h"
 
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
@@ -30,7 +31,7 @@ void Engine::Init() {
 
     GLenum res = glewInit();
     if (res != GLEW_OK) {
-        // TODO: glew init error
+        LOG_ERR("glew init error");
         return;
     }
 
