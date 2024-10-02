@@ -1,7 +1,7 @@
 #include "Engine.h"
 
 Engine::Engine() 
-    : _isRunning(false)
+    : _isRunning(false), _prevFrameMilliSecs(0)
 {
 
 }
@@ -12,7 +12,7 @@ void Engine::Init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #ifdef __APPLE__
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
     int windowWidth = 1024;
@@ -67,6 +67,13 @@ void Engine::ProcessInput() {
 }
 
 void Engine::Update() {
+    int timeToWait = (_prevFrameMilliSecs + MILLISECS_PER_FRAME) - SDL_GetTicks();
+    if(timeToWait > 0) {
+        SDL_Delay(timeToWait);
+    }
+    float deltaTime = (SDL_GetTicks() - _prevFrameMilliSecs) / 1000.f;
+    _prevFrameMilliSecs = SDL_GetTicks();
+
     // TODO:
 }
 

@@ -20,7 +20,11 @@ private:
     void Render();
 
 private:
+    const int FPS = 60;
+    const int MILLISECS_PER_FRAME = 1000 / FPS;
+
     bool _isRunning;
+    int _prevFrameMilliSecs;
 
     SDL_Window* _window;
     SDL_GLContext _glContext;
