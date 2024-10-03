@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
 
 class Engine {
 public:
@@ -15,6 +16,7 @@ public:
     void Destroy();
 
 private:
+    void Setup();
     void ProcessInput();
     void Update();
     void Render();
@@ -28,6 +30,8 @@ private:
 
     SDL_Window* _window;
     SDL_GLContext _glContext;
+
+    GLuint vbo;
 };
 
 #endif

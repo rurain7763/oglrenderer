@@ -9,11 +9,11 @@ Engine::Engine()
 
 void Engine::Init() {
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #ifdef __APPLE__
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
     int windowWidth = 1024;
@@ -35,10 +35,13 @@ void Engine::Init() {
         return;
     }
 
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+
     _isRunning = true;
 }
 
 void Engine::Run() {
+    Setup();
     while(_isRunning) {
         ProcessInput();
         Update();
@@ -47,9 +50,20 @@ void Engine::Run() {
 }
 
 void Engine::Destroy() {
+    glDeleteBuffers(1, &vbo);
+
     SDL_GL_DeleteContext(_glContext);
     SDL_DestroyWindow(_window);
     SDL_Quit();
+}
+
+void Engine::Setup() {
+    glm::vec3 vertices[1];
+    vertices[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 }
 
 void Engine::ProcessInput() {
@@ -79,5 +93,13 @@ void Engine::Update() {
 }
 
 void Engine::Render() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glDrawArrays(GL_POINTS, 0, 1);
+    glDisableVertexAttribArray(0);
+
     SDL_GL_SwapWindow(_window);
 }
