@@ -58,8 +58,10 @@ void Engine::Destroy() {
 }
 
 void Engine::Setup() {
-    glm::vec3 vertices[1];
-    vertices[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 vertices[3];
+    vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f); 
+    vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
+    vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -98,7 +100,7 @@ void Engine::Render() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glDrawArrays(GL_POINTS, 0, 1);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     glDisableVertexAttribArray(0);
 
     SDL_GL_SwapWindow(_window);
