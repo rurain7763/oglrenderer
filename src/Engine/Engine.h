@@ -29,12 +29,18 @@ private:
     int _prevFrameMilliSecs;
 
     SDL_Window* _window;
+    int _windowWidth, _windowHeight;
     SDL_GLContext _glContext;
 
     class VertexArray* _vao;
+    class VertexArray* _vaoLine;
     class VertexBuffer* _vbo;
+    class VertexBuffer* _vboLine;
     class IndexBuffer* _ibo;
+    class IndexBuffer* _iboLine;
     class Shader* _shader;
+
+    glm::mat4 _perspective;
 };
 
 #endif

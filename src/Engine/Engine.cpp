@@ -23,14 +23,14 @@ void Engine::Init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
-    int windowWidth = 1024;
-    int windowHeight = 720;
+    _windowWidth = 1024;
+    _windowHeight = 720;
     _window = SDL_CreateWindow(
         NULL,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        windowWidth,
-        windowHeight,
+        _windowWidth,
+        _windowHeight,
         SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL
     );
 
@@ -59,8 +59,11 @@ void Engine::Run() {
 
 void Engine::Destroy() {
     delete _shader;
+    delete _iboLine;
     delete _ibo;
+    delete _vboLine;
     delete _vbo;
+    delete _vaoLine;
     delete _vao;
 
     SDL_GL_DeleteContext(_glContext);
@@ -69,62 +72,78 @@ void Engine::Destroy() {
 }
 
 void Engine::Setup() {
+    const float aspect = _windowHeight / static_cast<float>(_windowWidth);
+
+    _perspective = Perspective(45.f, aspect, 0.1f, 100.f);
+
     _vao = new VertexArray();
+    _vaoLine = new VertexArray();
     _vbo = new VertexBuffer();
+    _vboLine = new VertexBuffer();
     _ibo = new IndexBuffer();
+    _iboLine = new IndexBuffer();
     _shader = new Shader();
 
     _vao->Bind();
 
     Vertex vertices[] = {
-        { glm::vec3(-0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(-0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
         { glm::vec3(-0.3f, -0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
         { glm::vec3(-0.3f, 0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
         { glm::vec3(0.3f, 0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, -0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) }
+        { glm::vec3(0.3f, -0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
+        { glm::vec3(-0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
+        { glm::vec3(-0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
+        { glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
+        { glm::vec3(0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) }
     };
-
     _vbo->Init(vertices, sizeof(vertices));
 
-#if false
     GLuint indices[] = { 
         0, 1, 2, 
-        0, 2, 3, 
-        1, 5, 6, 
-        1, 6, 2, 
-        5, 4, 7, 
-        5, 7, 6, 
-        4, 0, 3, 
-        4, 3, 7, 
-        3, 2, 6, 
-        3, 6, 7, 
-        0, 4, 5, 
-        0, 5, 1 
+        0, 2, 3,
+        7, 3, 2,
+        7, 2, 6,
+        4, 5, 6,
+        4, 6, 7,
+        0, 4, 7,
+        0, 7, 3,
+        1, 5, 6,
+        1, 6, 2,
+        0, 1, 5,
+        0, 5, 4
     };
-
-    _ibo->Init(indices, 12);
-#else
-    GLuint indices[] = {
-        0, 1, 1, 2, 2, 3, 3, 0,
-        4, 5, 5, 6, 6, 7, 7, 4,
-        0, 4, 1, 5, 2, 6, 3, 7
-    };
-
-    _ibo->Init(indices, 24);
-#endif
-
+    _ibo->Init(indices, sizeof(indices) / sizeof(GLuint));
 
     VertexBufferLayoutGroup layoutGroup;
     layoutGroup.Push<float>(3);
     layoutGroup.Push<float>(3);
 
     _vao->Init(*_vbo, layoutGroup);
-    _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
 
-    _vao->Unbind();
+    _vaoLine->Bind();
+
+    Vertex lineVertices[] = {
+        { glm::vec3(-0.3f, -0.3f, -0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(-0.3f, 0.3f, -0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(0.3f, 0.3f, -0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(0.3f, -0.3f, -0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(-0.3f, -0.3f, 0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(-0.3f, 0.3f, 0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(0.3f, -0.3f, 0.3f), glm::vec3(1.0, 0.0, 0.0) }
+    };
+    _vboLine->Init(lineVertices, sizeof(lineVertices));
+
+    GLuint indicesLine[] = {
+        0, 1, 1, 2, 2, 3, 3, 0,
+        4, 5, 5, 6, 6, 7, 7, 4,
+        0, 4, 1, 5, 2, 6, 3, 7
+    };
+    _iboLine->Init(indicesLine, sizeof(indicesLine) / sizeof(GLuint));
+
+    _vaoLine->Init(*_vboLine, layoutGroup);
+
+    _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
 }
 
 void Engine::ProcessInput() {
@@ -154,19 +173,26 @@ void Engine::Update() {
 void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glm::mat4 translate = Translation(0, 0, 0);
+    glm::mat4 translate = Translation(0, 0, 1.5);
     glm::mat4 rotateX = RotationX(SDL_GetTicks() / 1000.f);
     glm::mat4 rotateY = RotationY(SDL_GetTicks() / 1000.f);
     glm::mat4 rotateZ = RotationZ(0);
     glm::mat4 scale = Scaling(1, 1, 1);
     glm::mat4 worldMat = WorldMatrix(translate, rotateX * rotateY * rotateZ, scale);
 
+    glm::mat4 mvp = worldMat * _perspective;
+
     _vao->Bind();
     _shader->Bind();
-    _shader->SetUniform<glm::mat4>("world", worldMat);
+    _shader->SetUniform<glm::mat4>("mvp", mvp);
     _ibo->Bind();
-    //glDrawElements(GL_TRIANGLES, _ibo->GetCount(), GL_UNSIGNED_INT, 0);
-    glDrawElements(GL_LINES, _ibo->GetCount(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _ibo->GetCount(), GL_UNSIGNED_INT, 0);
+
+    _vaoLine->Bind();
+    _shader->Bind();
+    _shader->SetUniform<glm::mat4>("mvp", mvp);
+    _iboLine->Bind();
+    glDrawElements(GL_LINES, _iboLine->GetCount(), GL_UNSIGNED_INT, 0);
 
     SDL_GL_SwapWindow(_window);
 }

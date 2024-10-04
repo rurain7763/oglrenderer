@@ -18,4 +18,6 @@ glm::mat4 Scaling(float x, float y, float z);
 
 glm::mat4 WorldMatrix(const glm::mat4& translate, const glm::mat4& rotate, const glm::mat4& scale);
 
+glm::mat4 Perspective(float fov, float aspect, float near, float far);
+
 #endif
