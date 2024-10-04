@@ -11,6 +11,7 @@
                         );
 
 glm::mat4 Translation(float x, float y, float z);
+glm::mat4 RotationZ(float rot);
 glm::mat4 Scaling(float x, float y, float z);
 
 #endif

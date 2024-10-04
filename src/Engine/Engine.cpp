@@ -118,8 +118,9 @@ void Engine::Render() {
 
     _vao->Bind();
     _shader->Bind();
-    _shader->SetUniform<glm::mat4>("translate", Translation(sin(time) * 0.5, 0, 0));
-    _shader->SetUniform<glm::mat4>("scale", Scaling(sin(time), sin(time), 0));
+    _shader->SetUniform<glm::mat4>("translate", Translation(0, 0, 0));
+    _shader->SetUniform<glm::mat4>("rotate", RotationZ(time));
+    _shader->SetUniform<glm::mat4>("scale", Scaling(1, 1, 1));
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     SDL_GL_SwapWindow(_window);
