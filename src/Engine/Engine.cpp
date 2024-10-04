@@ -114,10 +114,9 @@ void Engine::Update() {
 void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    float time = SDL_GetTicks() / 1000.f;
-    glm::mat4 translate = Translation(sin(time) * 0.5, 0, 0);
-    glm::mat4 rotate = RotationZ(time);
-    glm::mat4 scale = Scaling(sin(time), sin(time), 1);
+    glm::mat4 translate = Translation(0, 0, 0);
+    glm::mat4 rotate = RotationZ(0);
+    glm::mat4 scale = Scaling(1, 1, 1);
     glm::mat4 worldMat = WorldMatrix(translate, rotate, scale);
 
     _vao->Bind();
