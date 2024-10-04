@@ -29,3 +29,7 @@ glm::mat4 Scaling(float x, float y, float z) {
     ret[2][2] = z;
     return ret;
 }
+
+glm::mat4 WorldMatrix(const glm::mat4& translate, const glm::mat4& rotate, const glm::mat4& scale) {
+    return scale * rotate * translate;
+}
