@@ -4,6 +4,7 @@
 #include "../VertexArray/VertexArray.h"
 #include "../VertexBuffer/VertexBuffer.h"
 #include "../VertexBuffer/VertexBufferLayoutGroup.h"
+#include "../Matrix/Matrix.h"
 
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
@@ -108,15 +109,16 @@ void Engine::Update() {
     float deltaTime = (SDL_GetTicks() - _prevFrameMilliSecs) / 1000.f;
     _prevFrameMilliSecs = SDL_GetTicks();
 
-    _triangleScale += 1.0 * deltaTime;
 }
 
 void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    float time = SDL_GetTicks() / 1000.f;
+
     _vao->Bind();
     _shader->Bind();
-    _shader->SetUniform<float>("scale", sin(_triangleScale));
+    _shader->SetUniform<glm::mat4>("translate", Translation(sin(time) * 0.5, cos(time) * 0.5, 0));
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     SDL_GL_SwapWindow(_window);

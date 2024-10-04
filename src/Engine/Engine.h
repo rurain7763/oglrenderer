@@ -34,7 +34,6 @@ private:
     class VertexArray* _vao;
     class VertexBuffer* _vbo;
     class Shader* _shader;
-    float _triangleScale = 0;
 };
 
 #endif

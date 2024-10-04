@@ -4,6 +4,7 @@
 #include <string>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
 #include <unordered_map>
 
 class Shader {
@@ -28,6 +29,11 @@ private:
     template<>
     void SetUniform<float>(const std::string& name, const float& v) {
         glUniform1f(GetUniformLocation(name), v);
+    }
+
+    template<>
+    void SetUniform<glm::mat4>(const std::string& name, const glm::mat4& v) {
+        glUniformMatrix4fv(GetUniformLocation(name), 1, GL_TRUE, &v[0][0]);
     }
 
 private:
