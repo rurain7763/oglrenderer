@@ -33,6 +33,7 @@ private:
 
     class VertexArray* _vao;
     class VertexBuffer* _vbo;
+    class IndexBuffer* _ibo;
     class Shader* _shader;
 };
 

@@ -1,16 +1,13 @@
 #version 330
 
 layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 color;
 
 uniform mat4 world;
 
-const vec4 colors[3] = vec4[3]( vec4(1, 0, 0, 1),
-                                vec4(0, 1, 0, 1),
-                                vec4(0, 0, 1, 1) );
-
-out vec4 color;
+out vec4 interpolated_color;
 
 void main() {
-    color = colors[gl_VertexID];
+    interpolated_color = vec4(color, 1.0);
     gl_Position = world * vec4(position, 1.0);
 }

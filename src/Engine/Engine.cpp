@@ -4,7 +4,9 @@
 #include "../VertexArray/VertexArray.h"
 #include "../VertexBuffer/VertexBuffer.h"
 #include "../VertexBuffer/VertexBufferLayoutGroup.h"
+#include "../IndexBuffer/IndexBuffer.h"
 #include "../Matrix/Matrix.h"
+#include "../Vertex/Vertex.h"
 
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
@@ -40,6 +42,7 @@ void Engine::Init() {
         return;
     }
 
+    glFrontFace(GL_CW);
     glClearColor(0.f, 0.f, 0.f, 0.f);
 
     _isRunning = true;
@@ -56,6 +59,7 @@ void Engine::Run() {
 
 void Engine::Destroy() {
     delete _shader;
+    delete _ibo;
     delete _vbo;
     delete _vao;
 
@@ -67,17 +71,25 @@ void Engine::Destroy() {
 void Engine::Setup() {
     _vao = new VertexArray();
     _vbo = new VertexBuffer();
+    _ibo = new IndexBuffer();
     _shader = new Shader();
 
     _vao->Bind();
 
-    glm::vec3 vertices[3];
-    vertices[0] = glm::vec3(-0.3f, -0.3f, 0.0f); 
-    vertices[1] = glm::vec3(0.3f, -0.3f, 0.0f);
-    vertices[2] = glm::vec3(0.0f, 0.3f, 0.0f);
+    Vertex vertices[] = {
+        { glm::vec3(-0.3f, -0.3f, 0.0f), glm::vec3(1.0, 0.0, 0.0) },
+        { glm::vec3(-0.3f, 0.3f, 0.0f), glm::vec3(0.0, 1.0, 0.0) },
+        { glm::vec3(0.3f, 0.3f, 0.0f), glm::vec3(0.0, 0.0, 1.0) },
+        { glm::vec3(0.3f, -0.3f, 0.0f), glm::vec3(1.0, 1.0, 1.0) }
+    };
+
+    GLuint indices[] = { 0, 1, 2, 0, 2, 3 };
+
     _vbo->Init(vertices, sizeof(vertices));
+    _ibo->Init(indices, 6);
 
     VertexBufferLayoutGroup layoutGroup;
+    layoutGroup.Push<float>(3);
     layoutGroup.Push<float>(3);
 
     _vao->Init(*_vbo, layoutGroup);
@@ -108,7 +120,6 @@ void Engine::Update() {
     }
     float deltaTime = (SDL_GetTicks() - _prevFrameMilliSecs) / 1000.f;
     _prevFrameMilliSecs = SDL_GetTicks();
-
 }
 
 void Engine::Render() {
@@ -122,7 +133,8 @@ void Engine::Render() {
     _vao->Bind();
     _shader->Bind();
     _shader->SetUniform<glm::mat4>("world", worldMat);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    _ibo->Bind();
+    glDrawElements(GL_TRIANGLES, _ibo->GetCount(), GL_UNSIGNED_INT, 0);
 
     SDL_GL_SwapWindow(_window);
 }

@@ -1,9 +1,9 @@
 #version 330
 
-in vec4 color;
-
 out vec4 fragColor;
 
+in vec4 interpolated_color;
+
 void main() {
-    fragColor = color;
+    fragColor = interpolated_color;
 }
