@@ -69,11 +69,11 @@ void Engine::Setup() {
     _shader = new Shader();
 
     _vao->Bind();
-    
+
     glm::vec3 vertices[3];
-    vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f); 
-    vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
-    vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
+    vertices[0] = glm::vec3(-0.3f, -0.3f, 0.0f); 
+    vertices[1] = glm::vec3(0.3f, -0.3f, 0.0f);
+    vertices[2] = glm::vec3(0.0f, 0.3f, 0.0f);
     _vbo->Init(vertices, sizeof(vertices));
 
     VertexBufferLayoutGroup layoutGroup;
@@ -108,14 +108,15 @@ void Engine::Update() {
     float deltaTime = (SDL_GetTicks() - _prevFrameMilliSecs) / 1000.f;
     _prevFrameMilliSecs = SDL_GetTicks();
 
-    // TODO:
+    _triangleScale += 1.0 * deltaTime;
 }
 
 void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    _shader->Bind();
     _vao->Bind();
+    _shader->Bind();
+    _shader->SetUniform<float>("scale", sin(_triangleScale));
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     SDL_GL_SwapWindow(_window);

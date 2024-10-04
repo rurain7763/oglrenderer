@@ -66,8 +66,12 @@ void Shader::Init(const std::string& vsFilePath, const std::string& fsFilePath) 
     }
 }
 
-void Shader::Bind() {
+void Shader::Bind() const {
     glUseProgram(_programID);
+}
+
+void Shader::Unbind() const {
+    glUseProgram(0);
 }
 
 bool Shader::ReadFile(const std::string& filePath, std::string& out) {
@@ -109,4 +113,18 @@ bool Shader::AttachShader(const std::string& shaderText, GLenum shaderType) {
     glAttachShader(_programID, shaderID);
 
     return true;
+}
+
+int Shader::GetUniformLocation(const std::string& name) {
+    if(_uniformLocCache.find(name) != _uniformLocCache.end()) {
+        return _uniformLocCache[name];
+    }
+
+    int location = glGetUniformLocation(_programID, name.c_str());
+    if (location == -1) {
+        LOG_WARN("uniform name '%s' doesn't exist!", name.c_str());
+    } 
+
+    _uniformLocCache[name] = location;
+    return location;
 }
