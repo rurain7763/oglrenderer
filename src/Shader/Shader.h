@@ -11,6 +11,7 @@ public:
     ~Shader();
 
     void Init(const std::string& vsFilePath, const std::string& fsFilePath);
+    
     void Bind();
 
 private:

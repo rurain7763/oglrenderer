@@ -6,8 +6,6 @@
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 
-#include "../Shader/Shader.h"
-
 class Engine {
 public:
     Engine();
@@ -33,9 +31,9 @@ private:
     SDL_Window* _window;
     SDL_GLContext _glContext;
 
-    GLuint _vao;
-    GLuint _vbo;
-    Shader _shader;
+    class VertexArray* _vao;
+    class VertexBuffer* _vbo;
+    class Shader* _shader;
 };
 
 #endif

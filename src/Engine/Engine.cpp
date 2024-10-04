@@ -1,5 +1,9 @@
 #include "Engine.h"
 #include "../Logger/Logger.h"
+#include "../Shader/Shader.h"
+#include "../VertexArray/VertexArray.h"
+#include "../VertexBuffer/VertexBuffer.h"
+#include "../VertexBuffer/VertexBufferLayoutGroup.h"
 
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
@@ -50,8 +54,9 @@ void Engine::Run() {
 }
 
 void Engine::Destroy() {
-    glDeleteBuffers(1, &_vbo);
-    glDeleteVertexArrays(1, &_vao);
+    delete _shader;
+    delete _vbo;
+    delete _vao;
 
     SDL_GL_DeleteContext(_glContext);
     SDL_DestroyWindow(_window);
@@ -59,19 +64,25 @@ void Engine::Destroy() {
 }
 
 void Engine::Setup() {
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
+    _vao = new VertexArray();
+    _vbo = new VertexBuffer();
+    _shader = new Shader();
 
+    _vao->Bind();
+    
     glm::vec3 vertices[3];
     vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f); 
     vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
     vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
+    _vbo->Init(vertices, sizeof(vertices));
 
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    VertexBufferLayoutGroup layoutGroup;
+    layoutGroup.Push<float>(3);
 
-    _shader.Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
+    _vao->Init(*_vbo, layoutGroup);
+    _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
+
+    _vao->Unbind();
 }
 
 void Engine::ProcessInput() {
@@ -103,12 +114,9 @@ void Engine::Update() {
 void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    _shader.Bind();
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    _shader->Bind();
+    _vao->Bind();
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDisableVertexAttribArray(0);
 
     SDL_GL_SwapWindow(_window);
 }

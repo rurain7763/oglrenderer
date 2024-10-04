@@ -67,7 +67,6 @@ void Shader::Init(const std::string& vsFilePath, const std::string& fsFilePath) 
 }
 
 void Shader::Bind() {
-    if(_programID == 0) return;
     glUseProgram(_programID);
 }
 

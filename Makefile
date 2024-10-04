@@ -6,7 +6,9 @@ INCLUDE_PATH = -I/opt/homebrew/include -I./vendor
 SRC_FILES = ./src/*.cpp \
 			./src/Engine/*.cpp \
 			./src/Logger/*.cpp \
-			./src/Shader/*.cpp
+			./src/Shader/*.cpp \
+			./src/VertexArray/*.cpp \
+			./src/VertexBuffer/*.cpp
 LIB_PATH = -L/opt/homebrew/lib
 LIB = -lSDL2 -lglew -lglut -lglm -framework OpenGL
 
