@@ -9,8 +9,9 @@ SRC_FILES = ./src/*.cpp \
 			./src/Shader/*.cpp \
 			./src/VertexArray/*.cpp \
 			./src/VertexBuffer/*.cpp \
-			./src/Matrix/*.cpp \
-			./src/IndexBuffer/*.cpp
+			./src/Matrix/*cpp \
+			./src/IndexBuffer/*.cpp \
+			./src/Camera/*.cpp 
 LIB_PATH = -L/opt/homebrew/lib
 LIB = -lSDL2 -lglew -lglut -lglm -framework OpenGL
 
