@@ -15,7 +15,7 @@ SRC_FILES = ./src/*.cpp \
 			./src/Texture/*.cpp \
 			./vendor/upng/*.c
 LIB_PATH = -L/opt/homebrew/lib
-LIB = -lSDL2 -lglew -lglut -lglm -framework OpenGL
+LIB = -lSDL2 -lglew -lglut -lglm -lassimp -framework OpenGL
 
 build:
 	${CC} ${FLAGS} ${LANG_STD} ${INCLUDE_PATH} ${SRC_FILES} ${LIB_PATH} ${LIB} -o ${PROJECT}.exe

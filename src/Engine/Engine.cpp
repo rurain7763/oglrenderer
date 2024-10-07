@@ -10,6 +10,10 @@
 #include "../Camera/Camera.h"
 #include "../Texture/Texture.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
 {
@@ -45,6 +49,9 @@ void Engine::Init() {
     }
 
     glFrontFace(GL_CW);
+    glCullFace(GL_FRONT);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.f, 0.f, 0.f, 0.f);
 
     _isRunning = true;
@@ -88,22 +95,44 @@ void Engine::Setup() {
 
     _vao->Bind();
 
-    Vertex vertices[] = {
-        { glm::vec3(-0.5, -0.5, 0.5), glm::vec2(0, 0), glm::vec3(1, 1, 1) },
-        { glm::vec3(-0.5, 0.5, 0.5), glm::vec2(0, 1), glm::vec3(1, 1, 1) },
-        { glm::vec3(0.5, 0.5, 0.5), glm::vec2(1, 1), glm::vec3(1, 1, 1) },
-        { glm::vec3(0.5, -0.5, 0.5), glm::vec2(1, 0), glm::vec3(1, 1, 1) },
-    };
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(
+        "./assets/obj/crab.obj", 
+        aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices
+    );
+    if(!scene) {
+        LOG_ERR("assimp error: %s", importer.GetErrorString());
+    }
 
-    GLuint indices[] = { 
-        0, 1, 2,
-        2, 3, 0,
-    };
+    std::vector<Vertex> vertices(scene->mNumMeshes * scene->mMeshes[0]->mNumVertices);
+    std::vector<GLuint> indices(scene->mMeshes[0]->mNumFaces * 3);
 
-    _vbo->Init(vertices, sizeof(vertices));
-    _ibo->Init(indices, sizeof(indices) / sizeof(GLuint));
+    for(int meshIdx = 0; meshIdx < scene->mNumMeshes; meshIdx++) {
+        const aiMesh* mesh = scene->mMeshes[meshIdx];
+
+        for(int i = 0; i < mesh->mNumVertices; i++) {
+            Vertex& vertex = vertices[i];
+            vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+            vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+            vertex.texCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+            vertex.color = glm::vec3(1.f, 1.f, 1.f);
+        }
+
+        for(int i = 0; i < mesh->mNumFaces; i++) {
+            const aiFace& face = mesh->mFaces[i];
+            for(int j = 0; j < face.mNumIndices; j++) {
+                indices[i * 3 + j] = face.mIndices[j];
+            }
+        }
+    }
+
+    _vbo->Init(vertices.data(), vertices.size() * sizeof(Vertex));
+    _ibo->Init(indices.data(), indices.size());
+
+    importer.FreeScene();
 
     VertexBufferLayoutGroup layoutGroup;
+    layoutGroup.Push<float>(3);
     layoutGroup.Push<float>(3);
     layoutGroup.Push<float>(2);
     layoutGroup.Push<float>(3);
@@ -111,7 +140,7 @@ void Engine::Setup() {
     _vao->Init(*_vbo, layoutGroup);
 
     _texture = new Texture();
-    _texture->LoadFromPng("./assets/images/cube.png");
+    _texture->LoadFromPng("./assets/obj/crab.png");
     _texture->Bind(0);
 
     _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
@@ -172,14 +201,14 @@ void Engine::Update() {
 }
 
 void Engine::Render() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 viewMat = _camera->GetViewMatrix();
 
     float time = SDL_GetTicks() / 1000.f;
     glm::mat4 translate = Translation(0, 0, -1.5);
     glm::mat4 rotateX = RotationX(time * 0);
-    glm::mat4 rotateY = RotationY(time * 0);
+    glm::mat4 rotateY = RotationY(time);
     glm::mat4 rotateZ = RotationZ(0);
     glm::mat4 scale = Scaling(1, 1, 1);
     glm::mat4 worldMat = WorldMatrix(translate, rotateX * rotateY * rotateZ, scale);
