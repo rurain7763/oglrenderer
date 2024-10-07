@@ -28,8 +28,8 @@ void Texture::Unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::LoadFromPng(const char* path) {
-    upng_t* png = upng_new_from_file(path);
+void Texture::LoadFromPng(const std::string& path) {
+    upng_t* png = upng_new_from_file(path.c_str());
     if (png == nullptr) {
         LOG_ERR("upng_new_from_file error");
         return;

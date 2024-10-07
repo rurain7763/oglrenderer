@@ -13,7 +13,8 @@ SRC_FILES = ./src/*.cpp \
 			./src/IndexBuffer/*.cpp \
 			./src/Camera/*.cpp \
 			./src/Texture/*.cpp \
-			./vendor/upng/*.c
+			./src/Mesh/*.cpp \
+			./vendor/upng/*.c 
 LIB_PATH = -L/opt/homebrew/lib
 LIB = -lSDL2 -lglew -lglut -lglm -lassimp -framework OpenGL
 

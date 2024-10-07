@@ -33,11 +33,8 @@ private:
     int _windowWidth, _windowHeight;
     SDL_GLContext _glContext;
 
-    class VertexArray* _vao;
-    class VertexBuffer* _vbo;
-    class IndexBuffer* _ibo;
+    class Mesh* _mesh;
     class Shader* _shader;
-    class Texture* _texture;
 
     glm::mat4 _perspective;
     class Camera* _camera;

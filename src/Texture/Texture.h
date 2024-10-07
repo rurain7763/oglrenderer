@@ -3,6 +3,7 @@
 
 #include "../../vendor/upng/upng.h"
 
+#include <string>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -14,7 +15,7 @@ public:
     void Bind(const int slot) const;
     void Unbind() const;
 
-    void LoadFromPng(const char* path);
+    void LoadFromPng(const std::string& path);
 
 private:
     GLuint _textureID;

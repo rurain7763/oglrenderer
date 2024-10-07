@@ -1,10 +1,7 @@
 #include "Engine.h"
 #include "../Logger/Logger.h"
 #include "../Shader/Shader.h"
-#include "../VertexArray/VertexArray.h"
-#include "../VertexBuffer/VertexBuffer.h"
-#include "../VertexBuffer/VertexBufferLayoutGroup.h"
-#include "../IndexBuffer/IndexBuffer.h"
+#include "../Mesh/Mesh.h"
 #include "../Matrix/Matrix.h"
 #include "../Vertex/Vertex.h"
 #include "../Camera/Camera.h"
@@ -67,12 +64,8 @@ void Engine::Run() {
 }
 
 void Engine::Destroy() {
-    delete _texture;
     delete _shader;
-    delete _ibo;
-    delete _vbo;
-    delete _vao;
-
+    delete _mesh;
     delete _camera;
 
     SDL_GL_DeleteContext(_glContext);
@@ -82,70 +75,17 @@ void Engine::Destroy() {
 
 void Engine::Setup() {
     const float aspect = _windowWidth / static_cast<float>(_windowHeight);
-
-    _camera = new Camera();
-    _camera->SetPosition(glm::vec3(0.f, 0.f, 0.f));
-
     _perspective = Perspective(45.f, aspect, 0.1f, 100.f);
 
-    _vao = new VertexArray();
-    _vbo = new VertexBuffer();
-    _ibo = new IndexBuffer();
+    _camera = new Camera();
+    _camera->SetPosition(glm::vec3(0.f, 0.f, 2.f));
+
+    _mesh = Mesh::CreateMeshFromObj("./assets/obj/crab.obj");
+    _mesh->SetTexture("./assets/obj/crab.png");
+
     _shader = new Shader();
-
-    _vao->Bind();
-
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(
-        "./assets/obj/crab.obj", 
-        aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices
-    );
-    if(!scene) {
-        LOG_ERR("assimp error: %s", importer.GetErrorString());
-    }
-
-    std::vector<Vertex> vertices(scene->mNumMeshes * scene->mMeshes[0]->mNumVertices);
-    std::vector<GLuint> indices(scene->mMeshes[0]->mNumFaces * 3);
-
-    for(int meshIdx = 0; meshIdx < scene->mNumMeshes; meshIdx++) {
-        const aiMesh* mesh = scene->mMeshes[meshIdx];
-
-        for(int i = 0; i < mesh->mNumVertices; i++) {
-            Vertex& vertex = vertices[i];
-            vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-            vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-            vertex.texCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-            vertex.color = glm::vec3(1.f, 1.f, 1.f);
-        }
-
-        for(int i = 0; i < mesh->mNumFaces; i++) {
-            const aiFace& face = mesh->mFaces[i];
-            for(int j = 0; j < face.mNumIndices; j++) {
-                indices[i * 3 + j] = face.mIndices[j];
-            }
-        }
-    }
-
-    _vbo->Init(vertices.data(), vertices.size() * sizeof(Vertex));
-    _ibo->Init(indices.data(), indices.size());
-
-    importer.FreeScene();
-
-    VertexBufferLayoutGroup layoutGroup;
-    layoutGroup.Push<float>(3);
-    layoutGroup.Push<float>(3);
-    layoutGroup.Push<float>(2);
-    layoutGroup.Push<float>(3);
-
-    _vao->Init(*_vbo, layoutGroup);
-
-    _texture = new Texture();
-    _texture->LoadFromPng("./assets/obj/crab.png");
-    _texture->Bind(0);
-
     _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
     _shader->Bind();
-
     _shader->SetUniform<int>("texture0", 0);
 }
 
@@ -204,22 +144,15 @@ void Engine::Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 viewMat = _camera->GetViewMatrix();
-
-    float time = SDL_GetTicks() / 1000.f;
-    glm::mat4 translate = Translation(0, 0, -1.5);
-    glm::mat4 rotateX = RotationX(time * 0);
-    glm::mat4 rotateY = RotationY(time);
-    glm::mat4 rotateZ = RotationZ(0);
-    glm::mat4 scale = Scaling(1, 1, 1);
-    glm::mat4 worldMat = WorldMatrix(translate, rotateX * rotateY * rotateZ, scale);
+    glm::mat4 worldMat = _mesh->GetWorldMatrix();
 
     glm::mat4 mvp = worldMat * viewMat * _perspective;
 
-    _vao->Bind();
+    _mesh->GetVertexArray()->Bind();
+    _mesh->GetIndexBuffer()->Bind();
     _shader->Bind();
     _shader->SetUniform<glm::mat4>("mvp", mvp);
-    _ibo->Bind();
-    glDrawElements(GL_TRIANGLES, _ibo->GetCount(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _mesh->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
     SDL_GL_SwapWindow(_window);
 }
