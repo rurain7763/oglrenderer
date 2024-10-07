@@ -37,6 +37,7 @@ private:
     class VertexBuffer* _vbo;
     class IndexBuffer* _ibo;
     class Shader* _shader;
+    class Texture* _texture;
 
     glm::mat4 _perspective;
     class Camera* _camera;

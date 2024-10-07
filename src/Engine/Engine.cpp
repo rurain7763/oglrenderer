@@ -8,6 +8,7 @@
 #include "../Matrix/Matrix.h"
 #include "../Vertex/Vertex.h"
 #include "../Camera/Camera.h"
+#include "../Texture/Texture.h"
 
 Engine::Engine() 
     : _isRunning(false), _prevFrameMilliSecs(0)
@@ -59,6 +60,7 @@ void Engine::Run() {
 }
 
 void Engine::Destroy() {
+    delete _texture;
     delete _shader;
     delete _ibo;
     delete _vbo;
@@ -87,29 +89,15 @@ void Engine::Setup() {
     _vao->Bind();
 
     Vertex vertices[] = {
-        { glm::vec3(-0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(-0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, -0.3f, 0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(-0.3f, -0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(-0.3f, 0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, 0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) },
-        { glm::vec3(0.3f, -0.3f, -0.3f), glm::vec3(1.0, 1.0, 1.0) }
+        { glm::vec3(-0.5, -0.5, 0.5), glm::vec2(0, 0), glm::vec3(1, 1, 1) },
+        { glm::vec3(-0.5, 0.5, 0.5), glm::vec2(0, 1), glm::vec3(1, 1, 1) },
+        { glm::vec3(0.5, 0.5, 0.5), glm::vec2(1, 1), glm::vec3(1, 1, 1) },
+        { glm::vec3(0.5, -0.5, 0.5), glm::vec2(1, 0), glm::vec3(1, 1, 1) },
     };
 
     GLuint indices[] = { 
-        0, 1, 2, 
-        0, 2, 3,
-        7, 3, 2,
-        7, 2, 6,
-        4, 5, 6,
-        4, 6, 7,
-        0, 4, 7,
-        0, 7, 3,
-        1, 5, 6,
-        1, 6, 2,
-        0, 1, 5,
-        0, 5, 4
+        0, 1, 2,
+        2, 3, 0,
     };
 
     _vbo->Init(vertices, sizeof(vertices));
@@ -117,11 +105,19 @@ void Engine::Setup() {
 
     VertexBufferLayoutGroup layoutGroup;
     layoutGroup.Push<float>(3);
+    layoutGroup.Push<float>(2);
     layoutGroup.Push<float>(3);
 
     _vao->Init(*_vbo, layoutGroup);
 
+    _texture = new Texture();
+    _texture->LoadFromPng("./assets/images/cube.png");
+    _texture->Bind(0);
+
     _shader->Init("./assets/shader/shader.vs", "./assets/shader/shader.fs");
+    _shader->Bind();
+
+    _shader->SetUniform<int>("texture0", 0);
 }
 
 void Engine::ProcessInput() {
@@ -181,7 +177,7 @@ void Engine::Render() {
     glm::mat4 viewMat = _camera->GetViewMatrix();
 
     float time = SDL_GetTicks() / 1000.f;
-    glm::mat4 translate = Translation(0, 0, sin(time) * 0);
+    glm::mat4 translate = Translation(0, 0, -1.5);
     glm::mat4 rotateX = RotationX(time * 0);
     glm::mat4 rotateY = RotationY(time * 0);
     glm::mat4 rotateZ = RotationZ(0);

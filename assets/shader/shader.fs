@@ -1,9 +1,12 @@
 #version 330
 
-out vec4 fragColor;
+uniform sampler2D texture0;
 
+in vec2 interpolated_texcoord;
 in vec4 interpolated_color;
 
+out vec4 fragColor;
+
 void main() {
-    fragColor = interpolated_color;
+    fragColor = interpolated_color * texture(texture0, interpolated_texcoord);
 }

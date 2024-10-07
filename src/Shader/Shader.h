@@ -27,6 +27,11 @@ private:
     int GetUniformLocation(const std::string& name);
 
     template<>
+    void SetUniform<int>(const std::string& name, const int& v) {
+        glUniform1i(GetUniformLocation(name), v);
+    }
+
+    template<>
     void SetUniform<float>(const std::string& name, const float& v) {
         glUniform1f(GetUniformLocation(name), v);
     }
